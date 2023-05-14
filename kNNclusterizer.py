@@ -1,9 +1,11 @@
 import os
 import numpy as np
+import matplotlib.pyplot as plt
 from scipy.sparse import csr_matrix
 from bs4 import BeautifulSoup
 from klusterizerAdditionalFunc import SGMReader
 from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.decomposition import PCA
 from sklearn.manifold import TSNE
 import nltk
 from nltk.corpus import stopwords
@@ -15,6 +17,9 @@ class kNNсlusterizer:
         self.clusterNum = clusterNum
         self.neighborNum = neighborNum
         self.vocab = None
+        self.clusterList = None
+        self.nameList = None
+        self.matrix = None
 
     @staticmethod
     def readSGM(path, folder=False, file=True):
@@ -39,15 +44,15 @@ class kNNсlusterizer:
 
     def one_matrix_cluster_init(self, text_list):
         n_col, n_row = text_list[0]['body'].toarray().shape
-        matrix = np.empty((len(text_list), n_row))
-        dt = np.dtype([('name', 'U10'), ('cluster', 'i4')])
-        cluster_names_list = np.empty(n_row, dtype=dt)
+        self.matrix = np.empty((len(text_list), n_row))
+        self.clusterList = np.empty(len(text_list), dtype="int")
+        self.nameList = np.empty(len(text_list), dtype="<U16")
         for i in range(len(text_list)):
             random_cluster = np.random.randint(self.clusterNum)
-            cluster_names_list[i]['name'] = text_list[i]['title']
-            cluster_names_list[i]['cluster'] = random_cluster
-            matrix[i] = text_list[i]['body'].toarray()
-        return matrix
+            self.nameList[i] = text_list[i]['title']
+            self.clusterList[i] = random_cluster
+            self.matrix[i] = text_list[i]['body'].toarray()
+        return self.matrix
 
     @staticmethod
     def body_vectorize(text_list):
@@ -72,3 +77,14 @@ class kNNсlusterizer:
             text['body'] = vectorizer.transform([text['body']])
         return text_list
 
+    def visualise(self, matrix, reduction="TSNE"):
+        if reduction == "TSNE":
+            x = TSNE(n_components=2, perplexity=30, learning_rate=200)
+            plt.title("TSNE")
+        else:
+            x = PCA(n_components=2)
+            plt.title("PCA")
+
+        X_reduced = x.fit_transform(matrix)
+        plt.scatter(X_reduced[:, 0], X_reduced[:, 1], c=self.clusterList)
+        plt.show()
