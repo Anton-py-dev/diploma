@@ -37,6 +37,18 @@ class kNNсlusterizer:
             #cluster_arr[i] = (text_list[i]['title'], text_list[i]['body'], random_cluster)
         return cluster_arr
 
+    def one_matrix_cluster_init(self, text_list):
+        n_col, n_row = text_list[0]['body'].toarray().shape
+        matrix = np.empty((len(text_list), n_row))
+        dt = np.dtype([('name', 'U10'), ('cluster', 'i4')])
+        cluster_names_list = np.empty(n_row, dtype=dt)
+        for i in range(len(text_list)):
+            random_cluster = np.random.randint(self.clusterNum)
+            cluster_names_list[i]['name'] = text_list[i]['title']
+            cluster_names_list[i]['cluster'] = random_cluster
+            matrix[i] = text_list[i]['body'].toarray()
+        return matrix
+
     @staticmethod
     def body_vectorize(text_list):
         vectorizer = TfidfVectorizer()
