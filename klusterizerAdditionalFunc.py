@@ -1,16 +1,15 @@
 import os
 import re
-
-import sklearn.metrics.pairwise
 from bs4 import BeautifulSoup
-from sklearn.feature_extraction.text import TfidfVectorizer
-import nltk
-from nltk.corpus import stopwords
-from nltk.stem import WordNetLemmatizer
 
 
 class SGMReader:
     def parse_sgm_file(self, filename):
+        """
+        Парсинг одного файлу .sgm
+        :param filename: шлях до файлу
+        :return: список текстів з файлу
+        """
         with open(filename, 'r') as f:
             soup = BeautifulSoup(f, 'html.parser')
             texts = []
@@ -25,7 +24,9 @@ class SGMReader:
 
     def parse_sgm_directory(self, directory_path):
         """
-        Парсинг всіх файлів формату SGM в директорії і повернення списку текстів.
+        Парсинг всіх файлів в дерикторії з розширенням .sgm
+        :param directory_path: шлях до папки
+        :return: список текстів з файлів
         """
         texts = []
         for filename in os.listdir(directory_path):
@@ -33,4 +34,17 @@ class SGMReader:
                 file_path = os.path.join(directory_path, filename)
                 text = self.parse_sgm_file(file_path)
                 texts += text
+        return texts
+
+    def parse_sgm_file_list(self, file_list):
+        """
+        Парсинг файлів зі списку що мають розширення .sgm
+        :param file_list: список шляхів до файлів
+        :return: список текстів з файлів
+        """
+        texts = []
+        for filename in file_list:
+            file_path = os.path.join(filename)
+            text = self.parse_sgm_file(file_path)
+            texts += text
         return texts
